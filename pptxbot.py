@@ -3,8 +3,6 @@ import telebot
 import os
 
 CONTENT = ["text", "audio", "document", "photo", "sticker", "video", "video_note", "voice", "location", "contact"]
-def hi():
-    pass
 
 def contenthelp(message, typ):
     er = "Введите "
@@ -50,7 +48,7 @@ class Bot:
         self.help_type = 0
 
     def sendhi(self, message):
-        print(str(message.from_user.first_name), str(message.text))
+        print(str(message.from_user.username), str(message.text))
         self.bot.send_message(message.chat.id,
                               "Привет, я бот, помогающий сделать презентацию в привычном формате "
                               ".pptx прямо в Telegram!")
@@ -84,7 +82,7 @@ class Bot:
             self.bot.register_next_step_handler(message, self.getdesign)
 
     def getcount(self, message):
-        print(str(message.from_user.first_name), str(message.text))
+        print(str(message.from_user.username), str(message.text))
         try:
             if int(message.text) > 0:
                 self.count = int(message.text)
@@ -130,7 +128,7 @@ class Bot:
             self.bot.register_next_step_handler(message, self.gettypes)
 
     def getslides(self, message):
-        print(str(message.from_user.first_name), str(message.text))
+        print(str(message.from_user.username), str(message.text))
         if message.content_type != "text":
             self.bot.reply_to(message, contenthelp(message, "текст"))
             print("Bot", contenthelp(message, "текст"))
@@ -143,7 +141,7 @@ class Bot:
             self.bot.register_next_step_handler(message, self.gettxt)
 
     def gettxt(self, message):
-        print(str(message.from_user.first_name), str(message.text))
+        print(str(message.from_user.username), str(message.text))
         if message.content_type != "text":
             self.bot.reply_to(message, contenthelp(message, "текст"))
             print("Bot", contenthelp(message, "текст"))
@@ -166,9 +164,9 @@ class Bot:
         if message.text == "Нет, не нужен":
             self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...", reply_markup=telebot.types.ReplyKeyboardRemove())
             print(self.types)
-            makepresentation(self.design, message.from_user.first_name + '_presentation.pptx', self.helper, message.text)
-            self.bot.send_document(message.chat.id, open(message.from_user.first_name + '_presentation.pptx', 'rb'))
-            os.remove(message.from_user.first_name + '_presentation.pptx')
+            makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper, message.text)
+            self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
+            os.remove(message.from_user.username + '_presentation.pptx')
         elif message.text == "Да, нужен":
             self.bot.send_message(message.chat.id, "Введите текст заголовка титульного слайда", reply_markup=telebot.types.ReplyKeyboardRemove())
             self.bot.register_next_step_handler(message, self.gettitle)
@@ -188,9 +186,9 @@ class Bot:
         if message.text == "Нет, не нужен":
             self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...", reply_markup=telebot.types.ReplyKeyboardRemove())
             print(self.types)
-            makepresentation(self.design, message.from_user.first_name + '_presentation.pptx', self.helper, message.text)
-            self.bot.send_document(message.chat.id, open(message.from_user.first_name + '_presentation.pptx', 'rb'))
-            os.remove(message.from_user.first_name + '_presentation.pptx')
+            makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper, message.text)
+            self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
+            os.remove(message.from_user.username + '_presentation.pptx')
         elif message.text == "Да, нужен":
             self.bot.send_message(message.chat.id, "Введите текст подзаголовка титульного слайда", reply_markup=telebot.types.ReplyKeyboardRemove())
             self.bot.register_next_step_handler(message, self.sending)
@@ -202,9 +200,9 @@ class Bot:
         self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...",
                               reply_markup=telebot.types.ReplyKeyboardRemove())
         print(self.types)
-        makepresentation(self.design, message.from_user.first_name + '_presentation.pptx', self.helper, message.text)
-        self.bot.send_document(message.chat.id, open(message.from_user.first_name + '_presentation.pptx', 'rb'))
-        os.remove(message.from_user.first_name + '_presentation.pptx')
+        makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper, message.text)
+        self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
+        os.remove(message.from_user.username + '_presentation.pptx')
 
 
 bot = telebot.TeleBot("1409542686:AAHrny9RYqsRqZ7WCaROOXk9bshxJsBNS2Q")
