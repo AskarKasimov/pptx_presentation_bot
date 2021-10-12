@@ -3,7 +3,8 @@ import telebot
 import os
 
 CONTENT = ["text", "audio", "document", "photo", "sticker", "video", "video_note", "voice", "location", "contact"]
-
+def hi():
+    pass
 
 def contenthelp(message, typ):
     er = "Введите "
