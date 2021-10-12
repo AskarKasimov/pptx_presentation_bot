@@ -29,13 +29,13 @@ def makepresentation(design, types, naming, title=None, subtitle=None):
     prs = pptx.Presentation(f"designes/{design}.pptx")
     if title:
         slide = prs.slides.add_slide(prs.slide_layouts[0])
-        slide.shapes.title.text = str(title)
+        slide.placeholders[0].text = str(title)
         slide.placeholders[1].text = str(subtitle) if subtitle else ""
     for txt in types:
         slide = prs.slides.add_slide(prs.slide_layouts[int(txt["type"])])
         slide.shapes.title.text = str(txt["text1"])
         slide.placeholders[1].text = str(txt["text2"])
-    prs.save(naming + '_presentation.pptx')
+    prs.save(naming)
 
 
 class Bot:
@@ -186,7 +186,7 @@ class Bot:
         if message.text == "Нет, не нужен":
             self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...", reply_markup=telebot.types.ReplyKeyboardRemove())
             print(self.types)
-            makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper, message.text)
+            makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper)
             self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
             os.remove(message.from_user.username + '_presentation.pptx')
         elif message.text == "Да, нужен":
