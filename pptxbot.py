@@ -208,7 +208,6 @@ class Bot:
 
 bot = telebot.TeleBot("1409542686:AAHrny9RYqsRqZ7WCaROOXk9bshxJsBNS2Q")
 
-
 @bot.message_handler(commands=['start'])
 def sendhi(message):
     Bot(bot).sendhi(message)
