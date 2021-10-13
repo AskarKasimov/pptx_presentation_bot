@@ -1,7 +1,8 @@
 import pptx
 import telebot
 import os
-
+def sayhi():
+    pass
 CONTENT = ["text", "audio", "document", "photo", "sticker", "video", "video_note", "voice", "location", "contact"]
 
 def contenthelp(message, typ):
