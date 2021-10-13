@@ -1,9 +1,18 @@
 import pptx
 import telebot
 import os
-def sayhi():
-    pass
+
+SLIDE_TYPES = {
+    0: 2,
+    1: 2,
+    2: 2,
+    3: 3,
+    4: 5,
+    5: 1,
+    7: 3
+}
 CONTENT = ["text", "audio", "document", "photo", "sticker", "video", "video_note", "voice", "location", "contact"]
+
 
 def contenthelp(message, typ):
     er = "Введите "
@@ -33,16 +42,21 @@ def makepresentation(design, types, naming, title=None, subtitle=None):
         slide.placeholders[0].text = str(title)
         slide.placeholders[1].text = str(subtitle) if subtitle else ""
     for txt in types:
-        slide = prs.slides.add_slide(prs.slide_layouts[int(txt["type"])])
-        slide.shapes.title.text = str(txt["text1"])
-        slide.placeholders[1].text = str(txt["text2"])
+        slide = prs.slides.add_slide(prs.slide_layouts[txt["type"]])
+        for i in range(SLIDE_TYPES[txt["type"]]):
+            slide.placeholders[i].text = str(txt[f"text{i}"])
     prs.save(naming)
 
 
 class Bot:
     def __init__(self, bott):
+        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+        markup.row(telebot.types.KeyboardButton("Да, нужен"))
+        markup.row(telebot.types.KeyboardButton("Нет, не нужен"))
+        self.markup = markup
         self.bot = bott
-        self.count = 0
+        self.count_slides = 0
+        self.count_text = 0
         self.design = ""
         self.helper = ""
         self.types = list()
@@ -69,7 +83,7 @@ class Bot:
                                                        "Заполнить титульный слайд можно "
                                                        "будет в конце создания презентации.")
 
-                self.bot.register_next_step_handler(message, self.getcount)
+                self.bot.register_next_step_handler(message, self.getcount_slides)
             else:
                 raise ValueError("Номер дизайна не может быть отрицательным!")
         except ValueError as e:
@@ -82,11 +96,11 @@ class Bot:
             print("Bot", contenthelp(message, "число"))
             self.bot.register_next_step_handler(message, self.getdesign)
 
-    def getcount(self, message):
+    def getcount_slides(self, message):
         print(str(message.from_user.username), str(message.text))
         try:
             if int(message.text) > 0:
-                self.count = int(message.text)
+                self.count_slides = int(message.text)
                 for i in range(8):
                     if i != 6:
                         bot.send_photo(message.chat.id, open(f"types/{str(i)}.png", "rb"), f"Тип слайда №{str(i)}")
@@ -103,17 +117,20 @@ class Bot:
             er = e if str(e)[0] != "i" else "Введите целое число!"
             print("Bot", er)
             self.bot.reply_to(message, er)
-            self.bot.register_next_step_handler(message, self.getcount)
+            self.bot.register_next_step_handler(message, self.getcount_slides)
         except TypeError:
             self.bot.reply_to(message, contenthelp(message, "число"))
             print("Bot", contenthelp(message, "число"))
-            self.bot.register_next_step_handler(message, self.getcount)
+            self.bot.register_next_step_handler(message, self.getcount_slides)
 
     def gettypes(self, message):
         try:
             if int(message.text) >= 0:
+
                 self.help_type = int(message.text)
-                self.bot.send_message(message.chat.id, "Введите текст слайда")
+                self.count_text = SLIDE_TYPES[self.help_type]
+                self.types.append({"type": self.help_type})
+                self.bot.send_message(message.chat.id, "Введите текст №1 слайда №1")
 
                 self.bot.register_next_step_handler(message, self.getslides)
             else:
@@ -135,31 +152,35 @@ class Bot:
             print("Bot", contenthelp(message, "текст"))
             self.bot.register_next_step_handler(message, self.getslides)
         elif message.content_type == "text":
-            self.count -= 1
-            self.helper = message.text
-            self.bot.send_message(message.chat.id, "А теперь подтекст слайда")
-            print("Bot", "А теперь текст слайда")
-            self.bot.register_next_step_handler(message, self.gettxt)
+            print(self.count_slides)
 
-    def gettxt(self, message):
-        print(str(message.from_user.username), str(message.text))
-        if message.content_type != "text":
-            self.bot.reply_to(message, contenthelp(message, "текст"))
-            print("Bot", contenthelp(message, "текст"))
-            self.bot.register_next_step_handler(message, self.gettxt)
-        elif message.content_type == "text":
-            self.types.append({"type": self.help_type, "text1": self.helper, "text2": message.text})
-            if self.count != 0:
+            if self.count_text == 0:
+                self.count_slides -= 1
+                if self.count_slides == 0:
+                    self.bot.send_message(message.chat.id, "Вам нужен титульный слайд?", reply_markup=self.markup)
+                    self.bot.register_next_step_handler(message, self.title)
+                    return
                 self.bot.send_message(message.chat.id, "Следующий слайд... Тип?")
-                print("Bot", "Следующий слайд... Заголовок?")
                 self.bot.register_next_step_handler(message, self.gettypes)
-            else:
-                markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-                markup.row(telebot.types.KeyboardButton("Да, нужен"))
-                markup.row(telebot.types.KeyboardButton("Нет, не нужен"))
+                return
 
-                self.bot.send_message(message.chat.id, "Вам нужен титульный слайд?", reply_markup=markup)
-                self.bot.register_next_step_handler(message, self.title)
+            indexhelp = SLIDE_TYPES[self.help_type] - self.count_text
+            print(indexhelp)
+            self.types[-1][f"text{indexhelp}"] = message.text
+            print(self.types)
+            self.count_text -= 1
+            if self.count_text == 0:
+                self.count_slides -= 1
+                if self.count_slides == 0:
+                    self.bot.send_message(message.chat.id, "Вам нужен титульный слайд?", reply_markup=self.markup)
+                    self.bot.register_next_step_handler(message, self.title)
+                    return
+                self.bot.send_message(message.chat.id, "Следующий слайд... Тип?")
+                self.bot.register_next_step_handler(message, self.gettypes)
+                return
+            self.bot.send_message(message.chat.id, f"А теперь текст №{SLIDE_TYPES[self.help_type] - self.count_text + 1} слайда №{len(self.types)}")
+            print("Bot", "А теперь текст слайда")
+            self.bot.register_next_step_handler(message, self.getslides)
 
     def title(self, message):
         if message.text == "Нет, не нужен":
@@ -207,6 +228,7 @@ class Bot:
 
 
 bot = telebot.TeleBot("1409542686:AAHrny9RYqsRqZ7WCaROOXk9bshxJsBNS2Q")
+
 
 @bot.message_handler(commands=['start'])
 def sendhi(message):
