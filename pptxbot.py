@@ -152,7 +152,6 @@ class Bot:
             print("Bot", contenthelp(message, "текст"))
             self.bot.register_next_step_handler(message, self.getslides)
         elif message.content_type == "text":
-            print(self.count_slides)
 
             if self.count_text == 0:
                 self.count_slides -= 1
@@ -165,9 +164,7 @@ class Bot:
                 return
 
             indexhelp = SLIDE_TYPES[self.help_type] - self.count_text
-            print(indexhelp)
             self.types[-1][f"text{indexhelp}"] = message.text
-            print(self.types)
             self.count_text -= 1
             if self.count_text == 0:
                 self.count_slides -= 1
