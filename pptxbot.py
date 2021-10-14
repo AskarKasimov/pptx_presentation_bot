@@ -1,7 +1,8 @@
+import logging
 import pptx
 import telebot
 import os
-
+logging.basicConfig(filename="logs.log", level=logging.INFO)
 SLIDE_TYPES = {
     0: 2,
     1: 2,
@@ -182,7 +183,7 @@ class Bot:
     def title(self, message):
         if message.text == "Нет, не нужен":
             self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...", reply_markup=telebot.types.ReplyKeyboardRemove())
-            print(self.types)
+            logging.info(message.from_user.username+str(self.types))
             makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper, message.text)
             self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
             os.remove(message.from_user.username + '_presentation.pptx')
@@ -204,7 +205,7 @@ class Bot:
     def getsubs(self, message):
         if message.text == "Нет, не нужен":
             self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...", reply_markup=telebot.types.ReplyKeyboardRemove())
-            print(self.types)
+            logging.info(message.from_user.username+str(self.types))
             makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper)
             self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
             os.remove(message.from_user.username + '_presentation.pptx')
@@ -218,7 +219,7 @@ class Bot:
     def sending(self, message):
         self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...",
                               reply_markup=telebot.types.ReplyKeyboardRemove())
-        print(self.types)
+        logging.info(message.from_user.username+str(self.types))
         makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper, message.text)
         self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
         os.remove(message.from_user.username + '_presentation.pptx')
