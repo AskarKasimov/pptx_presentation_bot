@@ -22,3 +22,4 @@ LOG_FILE = "logs.log"
 # клавиатура
 import telebot
 MARKUP = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True).add(telebot.types.KeyboardButton("Да, нужен")).add(telebot.types.KeyboardButton("Нет, не нужен"))
+

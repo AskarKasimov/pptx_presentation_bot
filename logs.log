@@ -3,3 +3,43 @@ INFO:root:AskarTheBest[{'type': 5, 'text0': 'H'}, {'type': 5, 'text0': 'H'}]
 ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user
 ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user
 INFO:root:AskarTheBest[{'type': 3, 'text0': 'Гыгы', 'text1': 'Лол', 'text2': 'Хых'}, {'type': 1, 'text0': 'Нет', 'text1': 'Куку'}]
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+INFO:root:AskarTheBest[{'type': 5, 'text0': '5'}]
+INFO:root:AskarTheBest[{'type': 5, 'text0': 'Гыг'}]
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+INFO:root:AskarTheBest[{'type': 5, 'text0': 'Гыг'}]
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: parameter "media" is required
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: parameter "media" is required
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: wrong HTTP URL specified
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: strings must be encoded in UTF-8
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: wrong HTTP URL specified
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: parameter "media" is required
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: wrong HTTP URL specified
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: failed to get HTTP URL content
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: invalid file HTTP URL specified: URL host is empty
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: wrong HTTP URL specified
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: wrong HTTP URL specified
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: wrong HTTP URL specified
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: wrong HTTP URL specified
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: can't parse inline keyboard button: Text buttons are unallowed in the inline keyboard
+INFO:root:AskarTheBest[{'type': 1, 'text0': 'Hdjdjd', 'text1': 'Вхахха'}]
+INFO:root:AskarTheBest[{'type': 1, 'text0': 'Лвлввл', 'text1': 'Вдвддв'}]
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
+INFO:root:AskarTheBest[{'type': 1, 'text0': 'Алалал', 'text1': 'Хахаахах'}]

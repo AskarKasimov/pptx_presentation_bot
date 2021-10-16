@@ -6,7 +6,11 @@ from config import SLIDE_TYPES, CONTENT, TOKEN, LOG_FILE, MARKUP
 DESIGNS_NUMBER = len(os.listdir("designs")) - 1
 TYPES_NUMBER = len(os.listdir("types"))
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
-
+# inline клавиатура
+INLINE_MARKUP = telebot.types.InlineKeyboardMarkup()
+INLINE_MARKUP.add(telebot.types.InlineKeyboardButton(text='Вперед', callback_data="next 1"))
+INLINE_MARKUP.add(telebot.types.InlineKeyboardButton(text='Назад', callback_data="back " + str(DESIGNS_NUMBER)))
+INLINE_MARKUP.add(telebot.types.InlineKeyboardButton(text='Этот', callback_data="0"))
 
 def contenthelp(message, typ):
     er = "Введите "
@@ -47,7 +51,7 @@ class Bot:
         self.bot = bott
         self.count_slides = 0
         self.count_text = 0
-        self.design = ""
+        self.design = 0
         self.helper = ""
         self.types = list()
         self.help_type = 0
@@ -57,12 +61,9 @@ class Bot:
         self.bot.send_message(message.chat.id,
                               "Привет, я бот, помогающий сделать презентацию в привычном формате "
                               ".pptx прямо в Telegram!")
-
-        for i in range(DESIGNS_NUMBER):
-            bot.send_photo(message.chat.id, open(f"designs/demo/{str(i)}.png", "rb"), f"Дизайн №{str(i)}")
         bot.send_message(message.chat.id,
                          "Каким будет дизайн вашей презентации?\n--\nP.S. Напишите мне номер понравившегося варианта")
-        self.bot.register_next_step_handler(message, self.getdesign)
+        bot.send_photo(message.chat.id, open("designs/demo/0.png", "rb"), reply_markup=INLINE_MARKUP)
 
     def getdesign(self, message):
         try:
@@ -206,6 +207,29 @@ bot = telebot.TeleBot(TOKEN)
 @bot.message_handler(commands=['start'])
 def sendhi(message):
     Bot(bot).sendhi(message)
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def query_handler(call):
+
+    if call.data.split()[0] == "next" or call.data.split()[0] == "back":
+        mark = telebot.types.InlineKeyboardMarkup()
+        if call.data.split()[1] == str(DESIGNS_NUMBER):
+            mark.add(telebot.types.InlineKeyboardButton(text='Вперед',
+                                                        callback_data="next 0"))
+        else:
+            mark.add(telebot.types.InlineKeyboardButton(text='Вперед', callback_data="next " + str(int(call.data.split()[1]) + 1)))
+        if call.data.split()[1] == "0":
+            mark.add(telebot.types.InlineKeyboardButton(text='Назад', callback_data="back " + str(DESIGNS_NUMBER)))
+        else:
+            mark.add(telebot.types.InlineKeyboardButton(text='Назад', callback_data="back " + str(int(call.data.split()[1]) - 1)))
+        mark.add(telebot.types.InlineKeyboardButton(text='Этот', callback_data=call.data.split()[1]))
+        with open(f"designs/demo/{call.data.split()[1]}.png", "rb") as file:
+            bot.edit_message_media(reply_markup=mark, chat_id=call.message.chat.id, message_id=call.message.message_id, media=telebot.types.InputMedia(type="photo", media=file))
+    else:
+        bot.edit_message_caption("Дизайн вашей презентации, выбранный вами", call.message.chat.id, call.message.message_id)
+        call.message.text = int(call.data)
+        Bot(bot).getdesign(call.message)
 
 
 @bot.message_handler(content_types=CONTENT)
