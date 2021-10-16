@@ -18,3 +18,7 @@ TOKEN = "1409542686:AAHrny9RYqsRqZ7WCaROOXk9bshxJsBNS2Q"
 
 # лог-файл
 LOG_FILE = "logs.log"
+
+# клавиатура
+import telebot
+MARKUP = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True).add(telebot.types.KeyboardButton("Да, нужен")).add(telebot.types.KeyboardButton("Нет, не нужен"))

@@ -2,7 +2,7 @@ import logging
 import pptx
 import telebot
 import os
-from config import SLIDE_TYPES, CONTENT, TOKEN, LOG_FILE
+from config import SLIDE_TYPES, CONTENT, TOKEN, LOG_FILE, MARKUP
 DESIGNS_NUMBER = len(os.listdir("designs")) - 1
 TYPES_NUMBER = len(os.listdir("types"))
 logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
@@ -44,10 +44,6 @@ def makepresentation(design, types, naming, title=None, subtitle=None):
 
 class Bot:
     def __init__(self, bott):
-        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        markup.row(telebot.types.KeyboardButton("Да, нужен"))
-        markup.row(telebot.types.KeyboardButton("Нет, не нужен"))
-        self.markup = markup
         self.bot = bott
         self.count_slides = 0
         self.count_text = 0
@@ -146,24 +142,13 @@ class Bot:
             print("Bot", contenthelp(message, "текст"))
             self.bot.register_next_step_handler(message, self.getslides)
         elif message.content_type == "text":
-
-            if self.count_text == 0:
-                self.count_slides -= 1
-                if self.count_slides == 0:
-                    self.bot.send_message(message.chat.id, "Вам нужен титульный слайд?", reply_markup=self.markup)
-                    self.bot.register_next_step_handler(message, self.title)
-                    return
-                self.bot.send_message(message.chat.id, "Следующий слайд... Тип?")
-                self.bot.register_next_step_handler(message, self.gettypes)
-                return
-
             indexhelp = SLIDE_TYPES[self.help_type] - self.count_text
             self.types[-1][f"text{indexhelp}"] = message.text
             self.count_text -= 1
             if self.count_text == 0:
                 self.count_slides -= 1
                 if self.count_slides == 0:
-                    self.bot.send_message(message.chat.id, "Вам нужен титульный слайд?", reply_markup=self.markup)
+                    self.bot.send_message(message.chat.id, "Вам нужен титульный слайд?", reply_markup=MARKUP)
                     self.bot.register_next_step_handler(message, self.title)
                     return
                 self.bot.send_message(message.chat.id, "Следующий слайд... Тип?")
@@ -189,10 +174,7 @@ class Bot:
 
     def gettitle(self, message):
         self.helper = message.text
-        markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-        markup.row(telebot.types.KeyboardButton("Да, нужен"))
-        markup.row(telebot.types.KeyboardButton("Нет, не нужен"))
-        self.bot.send_message(message.chat.id, "Вам нужен подзаголовок?", reply_markup=markup)
+        self.bot.send_message(message.chat.id, "Вам нужен подзаголовок?", reply_markup=MARKUP)
         self.bot.register_next_step_handler(message, self.getsubs)
 
     def getsubs(self, message):
