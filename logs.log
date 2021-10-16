@@ -1,2 +1,3 @@
 INFO:root:AskarTheBest[{'type': 5, 'text0': 'G'}, {'type': 5, 'text0': 'T'}]
 INFO:root:AskarTheBest[{'type': 5, 'text0': 'H'}, {'type': 5, 'text0': 'H'}]
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user

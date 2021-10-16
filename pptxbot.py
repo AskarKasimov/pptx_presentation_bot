@@ -2,17 +2,10 @@ import logging
 import pptx
 import telebot
 import os
-logging.basicConfig(filename="logs.log", level=logging.INFO)
-SLIDE_TYPES = {
-    0: 2,
-    1: 2,
-    2: 2,
-    3: 3,
-    4: 5,
-    5: 1,
-    7: 3
-}
-CONTENT = ["text", "audio", "document", "photo", "sticker", "video", "video_note", "voice", "location", "contact"]
+from config import SLIDE_TYPES, CONTENT, TOKEN, LOG_FILE
+DESIGNS_NUMBER = len(os.listdir("designs")) - 1
+TYPES_NUMBER = len(os.listdir("types"))
+logging.basicConfig(filename=LOG_FILE, level=logging.INFO)
 
 
 def contenthelp(message, typ):
@@ -37,7 +30,7 @@ def contenthelp(message, typ):
 
 
 def makepresentation(design, types, naming, title=None, subtitle=None):
-    prs = pptx.Presentation(f"designes/{design}.pptx")
+    prs = pptx.Presentation(f"designs/{design}.pptx")
     if title:
         slide = prs.slides.add_slide(prs.slide_layouts[0])
         slide.placeholders[0].text = str(title)
@@ -69,15 +62,15 @@ class Bot:
                               "Привет, я бот, помогающий сделать презентацию в привычном формате "
                               ".pptx прямо в Telegram!")
 
-        for i in range(11):
-            bot.send_photo(message.chat.id, open(f"designes/demo/{str(i)}.png", "rb"), f"Дизайн №{str(i)}")
+        for i in range(DESIGNS_NUMBER):
+            bot.send_photo(message.chat.id, open(f"designs/demo/{str(i)}.png", "rb"), f"Дизайн №{str(i)}")
         bot.send_message(message.chat.id,
                          "Каким будет дизайн вашей презентации?\n--\nP.S. Напишите мне номер понравившегося варианта")
         self.bot.register_next_step_handler(message, self.getdesign)
 
     def getdesign(self, message):
         try:
-            if int(message.text) >= 0:
+            if int(message.text) in range(DESIGNS_NUMBER):
                 self.design = message.text
                 self.bot.send_message(message.chat.id, "Сколько слайдов должно быть в вашей презентации?\n--\n"
                                                        "P.S. Указывайте количество слайдов, не учитывая титульный. "
@@ -86,7 +79,7 @@ class Bot:
 
                 self.bot.register_next_step_handler(message, self.getcount_slides)
             else:
-                raise ValueError("Номер дизайна не может быть отрицательным!")
+                raise ValueError("Нет такого номера дизайна.\nВыберете номер, написанный под фото")
         except ValueError as e:
             er = e if str(e)[0] != "i" else "Введите номер дизайна (написано под фото)!"
             print("Bot", er)
@@ -102,7 +95,7 @@ class Bot:
         try:
             if int(message.text) > 0:
                 self.count_slides = int(message.text)
-                for i in range(8):
+                for i in range(TYPES_NUMBER):
                     if i != 6:
                         bot.send_photo(message.chat.id, open(f"types/{str(i)}.png", "rb"), f"Тип слайда №{str(i)}")
                 self.bot.send_message(message.chat.id,
@@ -126,7 +119,7 @@ class Bot:
 
     def gettypes(self, message):
         try:
-            if int(message.text) >= 0:
+            if int(message.text) in range(TYPES_NUMBER):
 
                 self.help_type = int(message.text)
                 self.count_text = SLIDE_TYPES[self.help_type]
@@ -135,7 +128,7 @@ class Bot:
 
                 self.bot.register_next_step_handler(message, self.getslides)
             else:
-                raise ValueError("Номер типа слайда не может быть отрицательным!")
+                raise ValueError("Нет такого номера дизайна.\nВыберете номер, написанный под фото")
         except ValueError as e:
             er = e if str(e)[0] != "i" else "Введите номер типа слайда (написано под фото)!"
             print("Bot", er)
@@ -225,7 +218,7 @@ class Bot:
         os.remove(message.from_user.username + '_presentation.pptx')
 
 
-bot = telebot.TeleBot("1409542686:AAHrny9RYqsRqZ7WCaROOXk9bshxJsBNS2Q")
+bot = telebot.TeleBot(TOKEN)
 
 
 @bot.message_handler(commands=['start'])
