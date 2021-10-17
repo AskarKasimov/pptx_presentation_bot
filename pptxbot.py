@@ -14,7 +14,7 @@ INLINE_MARKUP.row(telebot.types.InlineKeyboardButton(text='Назад', callback
 INLINE_MARKUP.add(telebot.types.InlineKeyboardButton(text='Этот', callback_data="0"))
 
 
-def contenthelp(message, typ):
+def content_help(message, typ):
     er = "Введите "
     if message.content_type == "photo":
         er = "Зачем мне картинка? Мне нужно получить "
@@ -35,7 +35,7 @@ def contenthelp(message, typ):
     return er + typ
 
 
-def makepresentation(design, types, naming, title=None, subtitle=None):
+def make_presentation(design, types, naming, title=None, subtitle=None):
     prs = pptx.Presentation(f"designs/{design}.pptx")
     if title:
         slide = prs.slides.add_slide(prs.slide_layouts[0])
@@ -50,58 +50,59 @@ def makepresentation(design, types, naming, title=None, subtitle=None):
 
 class Bot:
     def __init__(self, bott):
-        self.bot = bott
-        self.count_slides = 0
-        self.count_text = 0
-        self.design = 0
-        self.helper = ""
-        self.types = list()
-        self.help_type = 0
+        self._count_slides = 0
+        self._count_text = 0
+        self._help_type = 0
 
-    def sendhi(self, message):
+        self.prs_bot = bott
+        self.prs_design = 0
+        self.prs_title = ""
+        self.prs_content = list()
+
+    def start(self, message):
         print(str(message.from_user.username), str(message.text))
-        self.bot.send_message(message.chat.id,
-                              "Привет, я бот, помогающий сделать презентацию в привычном формате "
-                              ".pptx прямо в Telegram!")
+        self.prs_bot.send_message(message.chat.id,
+                                  "Привет, я бот, помогающий сделать презентацию в привычном формате "
+                                  ".pptx прямо в Telegram!")
         bot.send_message(message.chat.id,
                          "Каким будет дизайн вашей презентации?")
         bot.send_photo(message.chat.id, open("designs/demo/0.png", "rb"), f"Дизайн №1", reply_markup=INLINE_MARKUP)
 
-    def getdesign(self, message):
+    def get_design(self, message):
         try:
             if int(message.text) in range(DESIGNS_NUMBER):
-                self.design = message.text
-                self.bot.send_message(message.chat.id, "Сколько слайдов должно быть в вашей презентации?\n--\n"
-                                                       "P.S. Указывайте количество слайдов, не учитывая титульный. "
-                                                       "Заполнить титульный слайд можно "
-                                                       "будет в конце создания презентации.")
+                self.prs_design = message.text
+                self.prs_bot.send_message(message.chat.id, "Сколько слайдов должно быть в вашей презентации?\n--\n"
+                                                           "P.S. Указывайте количество слайдов, не учитывая титульный. "
+                                                           "Заполнить титульный слайд можно "
+                                                           "будет в конце создания презентации.")
 
-                self.bot.register_next_step_handler(message, self.getcount_slides)
+                self.prs_bot.register_next_step_handler(message, self.get_count_slides)
             else:
                 raise ValueError("Нет такого номера дизайна.\nВыберете номер, написанный под фото")
         except ValueError as e:
             er = e if str(e)[0] != "i" else "Введите номер дизайна (написано под фото)!"
             print("Bot", er)
-            self.bot.reply_to(message, er)
-            self.bot.register_next_step_handler(message, self.getdesign)
+            self.prs_bot.reply_to(message, er)
+            self.prs_bot.register_next_step_handler(message, self.get_design)
         except TypeError:
-            self.bot.reply_to(message, contenthelp(message, "число"))
-            print("Bot", contenthelp(message, "число"))
-            self.bot.register_next_step_handler(message, self.getdesign)
+            self.prs_bot.reply_to(message, content_help(message, "число"))
+            print("Bot", content_help(message, "число"))
+            self.prs_bot.register_next_step_handler(message, self.get_design)
 
-    def getcount_slides(self, message):
+    def get_count_slides(self, message):
         print(str(message.from_user.username), str(message.text))
         try:
             if int(message.text) > 0:
-                self.count_slides = int(message.text)
+                self._count_slides = int(message.text)
                 for i in range(TYPES_NUMBER):
                     if i != 6:
                         bot.send_photo(message.chat.id, open(f"types/{str(i)}.png", "rb"), f"Тип слайда №{str(i)}")
-                self.bot.send_message(message.chat.id,
-                                      "Сейчас нужно будет выбирать типы слайдов и "
-                                      "вводить заголовки и тексты, добавлять картинки...\n"
-                                      "Итак, тип первого слайда?")
-                self.bot.register_next_step_handler(message, self.gettypes)
+                self.prs_bot.send_message(message.chat.id,
+                                          "Сейчас нужно будет выбирать типы слайдов и "
+                                          "вводить заголовки и тексты, добавлять картинки...\n"
+                                          "Итак, тип первого слайда?")
+                self.prs_bot.register_next_step_handler(message, self.get_types)
             elif int(message.text) == 0:
                 raise ValueError("Число слайдов не может быть равным нулю!")
             else:
@@ -109,104 +110,109 @@ class Bot:
         except ValueError as e:
             er = e if str(e)[0] != "i" else "Введите целое число!"
             print("Bot", er)
-            self.bot.reply_to(message, er)
-            self.bot.register_next_step_handler(message, self.getcount_slides)
+            self.prs_bot.reply_to(message, er)
+            self.prs_bot.register_next_step_handler(message, self.get_count_slides)
         except TypeError:
-            self.bot.reply_to(message, contenthelp(message, "число"))
-            print("Bot", contenthelp(message, "число"))
-            self.bot.register_next_step_handler(message, self.getcount_slides)
+            self.prs_bot.reply_to(message, content_help(message, "число"))
+            print("Bot", content_help(message, "число"))
+            self.prs_bot.register_next_step_handler(message, self.get_count_slides)
 
-    def gettypes(self, message):
+    def get_types(self, message):
         try:
             if int(message.text) in range(TYPES_NUMBER):
 
-                self.help_type = int(message.text)
-                self.count_text = SLIDE_TYPES[self.help_type]
-                self.types.append({"type": self.help_type})
-                self.bot.send_message(message.chat.id, "Введите текст №1 слайда №1")
+                self._help_type = int(message.text)
+                self._count_text = SLIDE_TYPES[self._help_type]
+                self.prs_content.append({"type": self._help_type})
+                self.prs_bot.send_message(message.chat.id, "Введите текст №1 слайда №1")
 
-                self.bot.register_next_step_handler(message, self.getslides)
+                self.prs_bot.register_next_step_handler(message, self.get_slides)
             else:
                 raise ValueError("Нет такого номера дизайна.\nВыберете номер, написанный под фото")
         except ValueError as e:
             er = e if str(e)[0] != "i" else "Введите номер типа слайда (написано под фото)!"
             print("Bot", er)
-            self.bot.reply_to(message, er)
-            self.bot.register_next_step_handler(message, self.gettypes)
+            self.prs_bot.reply_to(message, er)
+            self.prs_bot.register_next_step_handler(message, self.get_types)
         except TypeError:
-            self.bot.reply_to(message, contenthelp(message, "число"))
-            print("Bot", contenthelp(message, "число"))
-            self.bot.register_next_step_handler(message, self.gettypes)
+            self.prs_bot.reply_to(message, content_help(message, "число"))
+            print("Bot", content_help(message, "число"))
+            self.prs_bot.register_next_step_handler(message, self.get_types)
 
-    def getslides(self, message):
+    def get_slides(self, message):
         print(str(message.from_user.username), str(message.text))
         if message.content_type != "text":
-            self.bot.reply_to(message, contenthelp(message, "текст"))
-            print("Bot", contenthelp(message, "текст"))
-            self.bot.register_next_step_handler(message, self.getslides)
+            self.prs_bot.reply_to(message, content_help(message, "текст"))
+            print("Bot", content_help(message, "текст"))
+            self.prs_bot.register_next_step_handler(message, self.get_slides)
         elif message.content_type == "text":
-            indexhelp = SLIDE_TYPES[self.help_type] - self.count_text
-            self.types[-1][f"text{indexhelp}"] = message.text
-            self.count_text -= 1
-            if self.count_text == 0:
-                self.count_slides -= 1
-                if self.count_slides == 0:
-                    self.bot.send_message(message.chat.id, "Вам нужен титульный слайд?", reply_markup=MARKUP)
-                    self.bot.register_next_step_handler(message, self.title)
+            index_help = SLIDE_TYPES[self._help_type] - self._count_text
+            self.prs_content[-1][f"text{index_help}"] = message.text
+            self._count_text -= 1
+            if self._count_text == 0:
+                self._count_slides -= 1
+                if self._count_slides == 0:
+                    self.prs_bot.send_message(message.chat.id, "Вам нужен титульный слайд?", reply_markup=MARKUP)
+                    self.prs_bot.register_next_step_handler(message, self.title)
                     return
-                self.bot.send_message(message.chat.id, "Следующий слайд... Тип?")
-                self.bot.register_next_step_handler(message, self.gettypes)
+                self.prs_bot.send_message(message.chat.id, "Следующий слайд... Тип?")
+                self.prs_bot.register_next_step_handler(message, self.get_types)
                 return
-            self.bot.send_message(message.chat.id,
-                                  f"А теперь текст №{SLIDE_TYPES[self.help_type] - self.count_text + 1} слайда №{len(self.types)}")
+            self.prs_bot.send_message(message.chat.id,
+                                      f"А теперь текст "
+                                      f"№{SLIDE_TYPES[self._help_type] - self._count_text + 1} слайда "
+                                      f"№{len(self.prs_content)}")
             print("Bot", "А теперь текст слайда")
-            self.bot.register_next_step_handler(message, self.getslides)
+            self.prs_bot.register_next_step_handler(message, self.get_slides)
 
     def title(self, message):
         if message.text == "Нет, не нужен":
-            self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...",
-                                  reply_markup=telebot.types.ReplyKeyboardRemove())
-            logging.info(message.from_user.username + str(self.types))
-            makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper,
-                             message.text)
-            self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
+            self.prs_bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...",
+                                      reply_markup=telebot.types.ReplyKeyboardRemove())
+            logging.info(message.from_user.username + str(self.prs_content))
+            make_presentation(self.prs_design, self.prs_content, message.from_user.username + '_presentation.pptx',
+                              self.prs_title,
+                              message.text)
+            self.prs_bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
             os.remove(message.from_user.username + '_presentation.pptx')
         elif message.text == "Да, нужен":
-            self.bot.send_message(message.chat.id, "Введите текст заголовка титульного слайда",
-                                  reply_markup=telebot.types.ReplyKeyboardRemove())
-            self.bot.register_next_step_handler(message, self.gettitle)
+            self.prs_bot.send_message(message.chat.id, "Введите текст заголовка титульного слайда",
+                                      reply_markup=telebot.types.ReplyKeyboardRemove())
+            self.prs_bot.register_next_step_handler(message, self.get_title)
         else:
-            self.bot.reply_to(message, "Выберете вариант ответа на экранчике под вашей клавиатурой")
-            self.bot.register_next_step_handler(message, self.title)
+            self.prs_bot.reply_to(message, "Выберете вариант ответа на экранчике под вашей клавиатурой")
+            self.prs_bot.register_next_step_handler(message, self.title)
 
-    def gettitle(self, message):
-        self.helper = message.text
-        self.bot.send_message(message.chat.id, "Вам нужен подзаголовок?", reply_markup=MARKUP)
-        self.bot.register_next_step_handler(message, self.getsubs)
+    def get_title(self, message):
+        self.prs_title = message.text
+        self.prs_bot.send_message(message.chat.id, "Вам нужен подзаголовок?", reply_markup=MARKUP)
+        self.prs_bot.register_next_step_handler(message, self.get_subs)
 
-    def getsubs(self, message):
+    def get_subs(self, message):
         if message.text == "Нет, не нужен":
-            self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...",
-                                  reply_markup=telebot.types.ReplyKeyboardRemove())
-            logging.info(message.from_user.username + str(self.types))
-            makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper)
-            self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
+            self.prs_bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...",
+                                      reply_markup=telebot.types.ReplyKeyboardRemove())
+            logging.info(message.from_user.username + str(self.prs_content))
+            make_presentation(self.prs_design, self.prs_content, message.from_user.username + '_presentation.pptx',
+                              self.prs_title)
+            self.prs_bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
             os.remove(message.from_user.username + '_presentation.pptx')
         elif message.text == "Да, нужен":
-            self.bot.send_message(message.chat.id, "Введите текст подзаголовка титульного слайда",
-                                  reply_markup=telebot.types.ReplyKeyboardRemove())
-            self.bot.register_next_step_handler(message, self.sending)
+            self.prs_bot.send_message(message.chat.id, "Введите текст подзаголовка титульного слайда",
+                                      reply_markup=telebot.types.ReplyKeyboardRemove())
+            self.prs_bot.register_next_step_handler(message, self.sending)
         else:
-            self.bot.reply_to(message, "Выберете вариант ответа на экранчике под вашей клавиатурой")
-            self.bot.register_next_step_handler(message, self.getsubs)
+            self.prs_bot.reply_to(message, "Выберете вариант ответа на экранчике под вашей клавиатурой")
+            self.prs_bot.register_next_step_handler(message, self.get_subs)
 
     def sending(self, message):
-        self.bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...",
-                              reply_markup=telebot.types.ReplyKeyboardRemove())
-        logging.info(message.from_user.username + str(self.types))
-        makepresentation(self.design, self.types, message.from_user.username + '_presentation.pptx', self.helper,
-                         message.text)
-        self.bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
+        self.prs_bot.send_message(message.chat.id, "Приготовьтесь, сейчас вылетит презентация...",
+                                  reply_markup=telebot.types.ReplyKeyboardRemove())
+        logging.info(message.from_user.username + str(self.prs_content))
+        make_presentation(self.prs_design, self.prs_content, message.from_user.username + '_presentation.pptx',
+                          self.prs_title,
+                          message.text)
+        self.prs_bot.send_document(message.chat.id, open(message.from_user.username + '_presentation.pptx', 'rb'))
         os.remove(message.from_user.username + '_presentation.pptx')
 
 
@@ -214,8 +220,8 @@ bot = telebot.TeleBot(TOKEN)
 
 
 @bot.message_handler(commands=['start'])
-def sendhi(message):
-    Bot(bot).sendhi(message)
+def start(message):
+    Bot(bot).start(message)
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -240,12 +246,14 @@ def query_handler(call):
         with open(f"designs/demo/{call.data.split()[1]}.png", "rb") as file:
             bot.edit_message_media(reply_markup=mark, chat_id=call.message.chat.id, message_id=call.message.message_id,
                                    media=telebot.types.InputMedia(type="photo", media=file))
-            bot.edit_message_caption(f"Дизайн №{str(int(call.data.split()[1]) + 1)}", call.message.chat.id, call.message.message_id, reply_markup=mark)
+            bot.edit_message_caption(f"Дизайн №{str(int(call.data.split()[1]) + 1)}", call.message.chat.id,
+                                     call.message.message_id, reply_markup=mark)
     else:
-        bot.edit_message_caption(f"Дизайн вашей презентации (№{str(int(call.data) + 1)}), выбранный вами", call.message.chat.id,
+        bot.edit_message_caption(f"Дизайн вашей презентации (№{str(int(call.data) + 1)}), выбранный вами",
+                                 call.message.chat.id,
                                  call.message.message_id)
         call.message.text = int(call.data)
-        Bot(bot).getdesign(call.message)
+        Bot(bot).get_design(call.message)
 
 
 @bot.message_handler(content_types=CONTENT)
