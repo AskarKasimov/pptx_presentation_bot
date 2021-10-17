@@ -43,3 +43,13 @@ INFO:root:AskarTheBest[{'type': 1, 'text0': 'Лвлввл', 'text1': 'Вдвддв'}]
 ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
 ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message is not modified: specified new message content and reply markup are exactly the same as a current content and reply markup of the message
 INFO:root:AskarTheBest[{'type': 1, 'text0': 'Алалал', 'text1': 'Хахаахах'}]
+INFO:root:AskarTheBest[{'type': 5, 'text0': 'Гыг'}]
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: message identifier is not specified
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: query is too old and response timeout expired or query ID is invalid
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 400. Description: Bad Request: query is too old and response timeout expired or query ID is invalid
+ERROR:TeleBot:A request to the Telegram API was unsuccessful. Error code: 403. Description: Forbidden: bot was blocked by the user
+INFO:root:AskarTheBest[{'type': 0, 'text0': 'Jdjxj', 'text1': 'Pspsps'}]
+INFO:root:AskarTheBest[{'type': 0, 'text0': 'Hdjd', 'text1': 'Pddppd'}]
+INFO:root:AskarTheBest[{'type': 0, 'text0': 'Hdjxnd', 'text1': 'Dpdppf'}]
+INFO:root:AskarTheBest[{'type': 4, 'text0': 'Hdjdbdn', 'text1': 'Ptotpfpf', 'text2': 'Yxyzyzyz', 'text3': 'Nfnfnfn', 'text4': 'Xuxuuxjxjx'}]
+INFO:root:AskarTheBest[{'type': 1, 'text0': 'Влвллв', 'text1': 'Хаахахах'}]
