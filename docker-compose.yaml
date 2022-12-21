@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  pptx:
+    build:
+      context: ./
+      args:
+        BOT_TOKEN: ${TOKEN}
+    container_name: pptx
+    restart: on-failure
