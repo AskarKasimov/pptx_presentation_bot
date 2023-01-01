@@ -2,7 +2,8 @@ import logging
 import os
 import pptx
 from aiogram.dispatcher import Dispatcher, FSMContext
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, ReplyKeyboardMarkup, \
+    KeyboardButton, ReplyKeyboardRemove
 from aiogram.utils.executor import start_polling
 from aiogram import Bot, types
 
@@ -35,11 +36,14 @@ MESSAGES = {
     "start_slides": "Итак, начнём заполнять слайды",
     "make_types": "Выберите тип слайда №{}",
     "make_slide": "Введите текст №{}",
-    "make_pptx": "Я всё запомнил:) Ща всё сделаю"
+    "make_pptx": "Я всё запомнил:) Ща всё сделаю",
+    "cancel": "Создание презентации отменено",
+    "cancel_button": u'\U0000274C' + " Отменить создание презентации",
+
 }
 
 ERRORS = {
-    "int_required": "Ошибка. Введите натуральное число\nP.S. Пока что я умею делать не больше 20 слайдов:)"
+    "int_required": "Ошибка. Введите натуральное число"
 }
 
 DESIGNS_NUMBER = len(os.listdir("designs")) - 1
@@ -60,11 +64,15 @@ INLINE_MARKUP_DESIGNS = InlineKeyboardMarkup()
 INLINE_MARKUP_DESIGNS.row(InlineKeyboardButton(text="Назад", callback_data="back " + str(DESIGNS_NUMBER - 1)),
                           InlineKeyboardButton(text="Вперёд", callback_data="next 1"))
 INLINE_MARKUP_DESIGNS.add(InlineKeyboardButton(text="Этот", callback_data="0"))
+INLINE_MARKUP_DESIGNS.add(InlineKeyboardButton(text=MESSAGES["cancel_button"], callback_data="cancel"))
 
 INLINE_MARKUP_TYPES = InlineKeyboardMarkup()
 INLINE_MARKUP_TYPES.row(InlineKeyboardButton(text="Назад", callback_data="back " + str(TYPE_NUMBER)),
                         InlineKeyboardButton(text="Вперёд", callback_data="next 1"))
-INLINE_MARKUP_TYPES.add(InlineKeyboardButton(text="Этот", callback_data="0"))
+INLINE_MARKUP_TYPES.add(InlineKeyboardButton(text=MESSAGES["cancel_button"], callback_data="cancel"))
+
+KEYBOARD_CANCEL = ReplyKeyboardMarkup(resize_keyboard=True)
+KEYBOARD_CANCEL.add(KeyboardButton(u'\U0000274C' + " Сбросить"))
 
 
 def make_presentation(design, slides, naming):
@@ -74,6 +82,15 @@ def make_presentation(design, slides, naming):
         for i in range(SLIDE_TYPES[slide_info["type"]]):
             slide.placeholders[i].text = str(slide_info["content"][i])
     prs.save(naming)
+
+
+async def check_cancel(message, state):
+    """ Проверка кнопки клавиатуры на сброс """
+    if message.text == u'\U0000274C' + " Сбросить":
+        await message.answer(MESSAGES["cancel"], reply_markup=ReplyKeyboardRemove())
+        await state.finish()
+        return True
+    return False
 
 
 class PresentationStates(StatesGroup):
@@ -114,17 +131,19 @@ async def bot_help(message: types.Message):
 @dp.message_handler(commands=["new"])
 async def presentation_start(message: types.Message):
     """ Начало создания презентации – запрос названия файла """
-    await message.answer(MESSAGES["presentation_start"])
+    await message.answer(MESSAGES["presentation_start"], reply_markup=KEYBOARD_CANCEL)
     await PresentationStates.name.set()
 
 
 @dp.message_handler(state=PresentationStates.name)
 async def get_filename(message: types.Message, state: FSMContext):
     """ Получение названия от пользователя """
+    if await check_cancel(message, state):
+        return
     await state.update_data(name=message.text)
     await message.answer(MESSAGES["get_name"].format(message.text))
     await PresentationStates.design_type.set()
-    await message.answer(MESSAGES["get_design_type"])
+    await message.answer(MESSAGES["get_design_type"], reply_markup=ReplyKeyboardRemove())
     await bot.send_photo(chat_id=message.chat.id, photo=open("designs/demo/0.png", "rb"), caption="Дизайн №1",
                          reply_markup=INLINE_MARKUP_DESIGNS)
 
@@ -133,7 +152,13 @@ async def get_filename(message: types.Message, state: FSMContext):
 async def inline_designs(call: types.CallbackQuery, state: FSMContext):
     """ Логика inline-клавиатуры под фото дизайнов """
     await bot.answer_callback_query(call.id)
-    if call.data.split()[0] == "next" or call.data.split()[0] == "back":
+    if call.data == "cancel":
+        await bot.edit_message_caption(caption=MESSAGES["cancel"],
+                                       chat_id=call.message.chat.id,
+                                       message_id=call.message.message_id,
+                                       reply_markup=None)
+        await state.finish()
+    elif call.data.split()[0] == "next" or call.data.split()[0] == "back":
         mark = InlineKeyboardMarkup()
         if call.data.split()[1] == str(DESIGNS_NUMBER - 1):
             but = InlineKeyboardButton(text='Вперед',
@@ -149,6 +174,7 @@ async def inline_designs(call: types.CallbackQuery, state: FSMContext):
                                           callback_data="back " + str(int(call.data.split()[1]) - 1)),
                      but)
         mark.add(InlineKeyboardButton(text='Этот', callback_data=call.data.split()[1]))
+        mark.add(InlineKeyboardButton(text=MESSAGES["cancel_button"], callback_data="cancel"))
         with open(f"designs/demo/{call.data.split()[1]}.png", "rb") as file:
             await bot.edit_message_media(chat_id=call.message.chat.id,
                                          message_id=call.message.message_id,
@@ -160,23 +186,23 @@ async def inline_designs(call: types.CallbackQuery, state: FSMContext):
                                        chat_id=call.message.chat.id,
                                        message_id=call.message.message_id)
         await state.update_data(design_type=int(call.data))
-        await call.message.answer(MESSAGES["get_slides_number"])
+        await call.message.answer(MESSAGES["get_slides_number"], reply_markup=KEYBOARD_CANCEL)
         await PresentationStates.slides_number.set()
 
 
 @dp.message_handler(state=PresentationStates.slides_number)
 async def get_number(message: types.Message, state: FSMContext):
     """ Получение количества слайдов от пользователя """
+    if await check_cancel(message, state):
+        return
     try:
         if float(message.text) != float(int(message.text)):
             raise ValueError
         if int(message.text) <= 0:
             raise ValueError
-        if int(message.text) > 20:
-            raise ValueError
         await state.update_data(slides_number=int(message.text))
         await message.answer(MESSAGES["start_slides"])
-        await message.answer(MESSAGES["make_types"].format(1))
+        await message.answer(MESSAGES["make_types"].format(1), reply_markup=ReplyKeyboardRemove())
         await state.update_data(types_message=0)
         await PresentationStates.last_type.set()
         await bot.send_photo(chat_id=message.chat.id, photo=open("types/0.png", "rb"), caption="Тип №1",
@@ -193,7 +219,13 @@ async def inline_types(call: types.CallbackQuery, state: FSMContext):
     data = await state.get_data()
     if data["types_message"] == 0:
         await state.update_data(types_message=call.message.message_id)
-    if call.data.split()[0] == "next" or call.data.split()[0] == "back":
+    if call.data == "cancel":
+        await bot.edit_message_caption(caption=MESSAGES["cancel"],
+                                       chat_id=call.message.chat.id,
+                                       message_id=call.message.message_id,
+                                       reply_markup=None)
+        await state.finish()
+    elif call.data.split()[0] == "next" or call.data.split()[0] == "back":
         mark = InlineKeyboardMarkup()
         if call.data.split()[1] == str(TYPE_NUMBER - 1):
             but = InlineKeyboardButton(text='Вперед',
@@ -209,6 +241,7 @@ async def inline_types(call: types.CallbackQuery, state: FSMContext):
                                           callback_data="back " + str(int(call.data.split()[1]) - 1)),
                      but)
         mark.add(InlineKeyboardButton(text='Этот', callback_data=call.data.split()[1]))
+        mark.add(InlineKeyboardButton(text=MESSAGES["cancel_button"], callback_data="cancel"))
         try:
             with open(f"types/{call.data.split()[1]}.png", "rb") as file:
                 await bot.edit_message_media(chat_id=call.message.chat.id,
@@ -230,16 +263,19 @@ async def inline_types(call: types.CallbackQuery, state: FSMContext):
         except KeyError:
             slides_len = 0
         slides_len += 1
-        await bot.edit_message_caption(caption=f"Тип слайда (№{str(int(call.data) + 1)}), выбранный вами для слайда №{slides_len}",
-                                       chat_id=call.message.chat.id,
-                                       message_id=call.message.message_id)
-        await call.message.answer(MESSAGES["make_slide"].format(1))
+        await bot.edit_message_caption(
+            caption=f"Тип слайда (№{str(int(call.data) + 1)}), выбранный вами для слайда №{slides_len}",
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id)
+        await call.message.answer(MESSAGES["make_slide"].format(1), reply_markup=KEYBOARD_CANCEL)
         await state.update_data(last_type=int(call.data))
         await PresentationStates.slides.set()
 
 
 @dp.message_handler(state=PresentationStates.slides)
 async def make_slides(message: types.Message, state: FSMContext):
+    if await check_cancel(message, state):
+        return
     data = await state.get_data()
     edited = False
     try:
@@ -268,7 +304,7 @@ async def make_slides(message: types.Message, state: FSMContext):
     now_number = len(slides[-1]["content"])
     if needed_number == now_number:
         if len(slides) == data["slides_number"]:
-            await message.answer(MESSAGES["make_pptx"])
+            await message.answer(MESSAGES["make_pptx"], reply_markup=ReplyKeyboardRemove())
             make_presentation(data["design_type"], slides, data["name"] + '.pptx')
             await bot.send_document(chat_id=message.chat.id, document=open(data["name"] + '.pptx', "rb"),
                                     caption="Готово!")
@@ -278,8 +314,10 @@ async def make_slides(message: types.Message, state: FSMContext):
             await state.finish()
         else:
             await PresentationStates.last_type.set()
-            await bot.edit_message_caption(chat_id=message.chat.id, message_id=data["types_message"], caption="Тип №1", reply_markup=INLINE_MARKUP_TYPES)
-            await bot.send_message(chat_id=message.chat.id, reply_to_message_id=data["types_message"], text="Следующий тип слайда?")
+            await bot.edit_message_caption(chat_id=message.chat.id, message_id=data["types_message"], caption="Тип №1",
+                                           reply_markup=INLINE_MARKUP_TYPES)
+            await bot.send_message(chat_id=message.chat.id, reply_to_message_id=data["types_message"],
+                                   text="Следующий тип слайда?", reply_markup=ReplyKeyboardRemove())
             # await bot.send_photo(chat_id=message.chat.id, photo=open("types/0.png", "rb"), caption="Тип №1",
             #                      reply_markup=INLINE_MARKUP_TYPES)
     else:
