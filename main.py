@@ -80,6 +80,7 @@ class PresentationStates(StatesGroup):
     name = State()
     design_type = State()
     slides_number = State()
+    types_message = State()
     last_type = State()
     slides = State()
 
@@ -95,6 +96,10 @@ class PresentationStates(StatesGroup):
 @dp.message_handler(commands=["start"])
 async def bot_start(message: types.Message):
     """ Стандартная команда начала диалога """
+    try:
+        logging.log(logging.INFO, str(message.from_user.id) + " " + message.from_user.username)
+    except Exception:
+        logging.log(logging.INFO, message.from_user.id)
     for msg in MESSAGES["start"]:
         await message.answer(msg)
 
@@ -172,6 +177,7 @@ async def get_number(message: types.Message, state: FSMContext):
         await state.update_data(slides_number=int(message.text))
         await message.answer(MESSAGES["start_slides"])
         await message.answer(MESSAGES["make_types"].format(1))
+        await state.update_data(types_message=0)
         await PresentationStates.last_type.set()
         await bot.send_photo(chat_id=message.chat.id, photo=open("types/0.png", "rb"), caption="Тип №1",
                              reply_markup=INLINE_MARKUP_TYPES)
@@ -184,6 +190,9 @@ async def get_number(message: types.Message, state: FSMContext):
 async def inline_types(call: types.CallbackQuery, state: FSMContext):
     """ Логика inline-клавиатуры под фото типов слайдов """
     await bot.answer_callback_query(call.id)
+    data = await state.get_data()
+    if data["types_message"] == 0:
+        await state.update_data(types_message=call.message.message_id)
     if call.data.split()[0] == "next" or call.data.split()[0] == "back":
         mark = InlineKeyboardMarkup()
         if call.data.split()[1] == str(TYPE_NUMBER - 1):
@@ -216,7 +225,12 @@ async def inline_types(call: types.CallbackQuery, state: FSMContext):
                                                                    caption=f"Тип №{str(int(call.data.split()[1]) + 1)}"),
                                              reply_markup=mark)
     else:
-        await bot.edit_message_caption(caption=f"Тип слайда (№{str(int(call.data) + 1)}), выбранный вами",
+        try:
+            slides_len = len(data["slides"])
+        except KeyError:
+            slides_len = 0
+        slides_len += 1
+        await bot.edit_message_caption(caption=f"Тип слайда (№{str(int(call.data) + 1)}), выбранный вами для слайда №{slides_len}",
                                        chat_id=call.message.chat.id,
                                        message_id=call.message.message_id)
         await call.message.answer(MESSAGES["make_slide"].format(1))
@@ -264,8 +278,10 @@ async def make_slides(message: types.Message, state: FSMContext):
             await state.finish()
         else:
             await PresentationStates.last_type.set()
-            await bot.send_photo(chat_id=message.chat.id, photo=open("types/0.png", "rb"), caption="Тип №1",
-                                 reply_markup=INLINE_MARKUP_TYPES)
+            await bot.edit_message_caption(chat_id=message.chat.id, message_id=data["types_message"], caption="Тип №1", reply_markup=INLINE_MARKUP_TYPES)
+            await bot.send_message(chat_id=message.chat.id, reply_to_message_id=data["types_message"], text="Следующий тип слайда?")
+            # await bot.send_photo(chat_id=message.chat.id, photo=open("types/0.png", "rb"), caption="Тип №1",
+            #                      reply_markup=INLINE_MARKUP_TYPES)
     else:
         await message.answer(MESSAGES["make_slide"].format(now_number + 1))
         await PresentationStates.slides.set()
