@@ -36,11 +36,30 @@ MESSAGES = {
     "start_slides": "Итак, начнём заполнять слайды",
     "make_types": "Выберите тип слайда №{}",
     "make_slide": "Введите текст №{}",
-    "make_pptx": "Я всё запомнил:) Ща всё сделаю",
+    "make_pptx": "Принято! Отправил презентацию на кухню:)",
     "cancel": "Создание презентации отменено",
     "cancel_button": u'\U0000274C' + " Отменить создание презентации",
 
 }
+
+# prs = pptx.Presentation("designs/3.pptx")
+#
+# prs.slides.add_slide(prs.slide_layouts[8])
+#
+# shapes = prs.slides[0].shapes
+#
+# img = Image.open("designs/demo/2.png")
+# img.thumbnail(size=(720, 390))
+# buf = io.BytesIO()
+# img.save(buf, format='PNG')
+#
+# image = shapes.add_picture(buf, left=0, top=0)
+#
+# image.left = (prs.slide_width - image.width) // 2
+#
+# prs.slides[0].placeholders[0].text = "gg"
+#
+# prs.save("GG.pptx")
 
 ERRORS = {
     "int_required": "Ошибка. Введите натуральное число"
@@ -69,10 +88,11 @@ INLINE_MARKUP_DESIGNS.add(InlineKeyboardButton(text=MESSAGES["cancel_button"], c
 INLINE_MARKUP_TYPES = InlineKeyboardMarkup()
 INLINE_MARKUP_TYPES.row(InlineKeyboardButton(text="Назад", callback_data="back " + str(TYPE_NUMBER)),
                         InlineKeyboardButton(text="Вперёд", callback_data="next 1"))
+INLINE_MARKUP_TYPES.add(InlineKeyboardButton(text="Этот", callback_data="0"))
 INLINE_MARKUP_TYPES.add(InlineKeyboardButton(text=MESSAGES["cancel_button"], callback_data="cancel"))
 
 KEYBOARD_CANCEL = ReplyKeyboardMarkup(resize_keyboard=True)
-KEYBOARD_CANCEL.add(KeyboardButton(u'\U0000274C' + " Сбросить"))
+KEYBOARD_CANCEL.add(KeyboardButton(MESSAGES["cancel_button"]))
 
 
 def make_presentation(design, slides, naming):
@@ -86,7 +106,7 @@ def make_presentation(design, slides, naming):
 
 async def check_cancel(message, state):
     """ Проверка кнопки клавиатуры на сброс """
-    if message.text == u'\U0000274C' + " Сбросить":
+    if message.text == MESSAGES["cancel_button"]:
         await message.answer(MESSAGES["cancel"], reply_markup=ReplyKeyboardRemove())
         await state.finish()
         return True
@@ -113,10 +133,6 @@ class PresentationStates(StatesGroup):
 @dp.message_handler(commands=["start"])
 async def bot_start(message: types.Message):
     """ Стандартная команда начала диалога """
-    try:
-        logging.log(logging.INFO, str(message.from_user.id) + " " + message.from_user.username)
-    except Exception:
-        logging.log(logging.INFO, message.from_user.id)
     for msg in MESSAGES["start"]:
         await message.answer(msg)
 
@@ -131,6 +147,10 @@ async def bot_help(message: types.Message):
 @dp.message_handler(commands=["new"])
 async def presentation_start(message: types.Message):
     """ Начало создания презентации – запрос названия файла """
+    try:
+        logging.log(logging.INFO, str(message.from_user.id) + " " + message.from_user.username)
+    except Exception:
+        logging.log(logging.INFO, message.from_user.id)
     await message.answer(MESSAGES["presentation_start"], reply_markup=KEYBOARD_CANCEL)
     await PresentationStates.name.set()
 
