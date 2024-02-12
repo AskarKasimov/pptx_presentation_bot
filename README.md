@@ -10,12 +10,3 @@ BOT_TOKEN=
 ```
 docker-compose up --build
 ```
-### Запуск без Docker
-Установка зависимостей:
-```
-pip install -r requirements.txt
-```
-Запуск:
-```
-python main.py
-```
