@@ -1,0 +1,15 @@
+FROM python:alpine3.19
+
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+
+WORKDIR /app
+
+RUN apk --no-cache add --update alpine-sdk
+
+COPY ./requirements.txt ./
+
+RUN pip3 install --no-cache-dir -r ./requirements.txt
+
+COPY . .
+ENTRYPOINT python3 ./polling_bot.py

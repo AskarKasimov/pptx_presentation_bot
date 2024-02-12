@@ -1,0 +1,10 @@
+version: '3.9'
+services:
+  pptx:
+    build:
+      context: ./
+      dockerfile: polling_Dockerfile
+    env_file:
+      - .env
+    container_name: pptx
+    restart: always

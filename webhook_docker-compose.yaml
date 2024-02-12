@@ -1,0 +1,12 @@
+version: '3.9'
+services:
+  pptx:
+    build:
+      context: ./
+      dockerfile: webhook_Dockerfile
+    env_file:
+      - .env
+    container_name: pptx
+    ports:
+      - 4444:4444
+    restart: always
